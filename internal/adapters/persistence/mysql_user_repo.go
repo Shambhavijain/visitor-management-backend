@@ -81,15 +81,6 @@ func (r *MySQLUserRepo) GetallUsers() ([]domain.User, error) {
 	return users, nil
 }
 
-func (r *MySQLUserRepo) UsernameExists(username string) (bool, error) {
-	query := `SELECT COUNT(*) FROM users WHERE username = ?`
-	var count int
-	err := r.DB.QueryRow(query, username).Scan(&count)
-	if err != nil {
-		return false, err
-	}
-	return count > 0, nil
-}
 func (r *MySQLUserRepo) GetUserById(userID string) (*domain.User, error) {
 
 	query := `

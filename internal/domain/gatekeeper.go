@@ -1,10 +1,11 @@
 package domain
 
 type Gatekeeper struct {
-	ID       string `json:"-"`
-	Role     string `json:"-"`
-	Username string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Address  string `json:"address"`
+	ID   string `json:"user_id" dynamodbav:"UserId"`
+	Role     string `json:"-" dynamodbav:"Role"`
+	Username string `json:"username" dynamodbav:"Username"`
+	Email    string `json:"email" dynamodbav:"Email"`
+	Password string `json:"password,omitempty" dynamodbav:"Password"`
+	Address  string `json:"address" dynamodbav:"Address"`
 }
+

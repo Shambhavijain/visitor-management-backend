@@ -1,44 +1,43 @@
 package application
 
 import (
-	"errors"
 	"fmt"
+	userRepository "visitor-management/internal/adapters/repository"
 	"visitor-management/internal/domain"
-	"visitor-management/internal/ports"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
-	userRepo ports.UserRepository
+	userRepo *userRepository.UserRepo
 }
 
-func NewAuthService(repo ports.UserRepository) *AuthService {
+func NewAuthService(repo *userRepository.UserRepo) *AuthService {
 	return &AuthService{userRepo: repo}
 }
 
-func (a *AuthService) Login(email, password string) (*domain.User, error) {
-	user, err := a.userRepo.GetByEmail(email)
+func (s *AuthService) Login(email, password string) (*domain.User, error) {
+	user, err := s.userRepo.GetByEmail(email)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return nil, err
 	}
+	// Debugging: Print the hashed password from the database
+	fmt.Printf("Stored hashed password: %s\n", user.Password)
 
-	if user.Password != password {
-		return nil, fmt.Errorf("invalid password")
+	// Debugging: Print the plain password provided in the request
+	fmt.Printf("Provided password: %s\n", password)
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		fmt.Println("Error comparing password:", err)
+		return nil, fmt.Errorf("invalid credentials")
 	}
 
 	return user, nil
 }
 
 func (s *UserService) Signup(name, email, password, address, flat_no, tower string) error {
-
-	exists, err := s.repo.UsernameExists(name)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return errors.New("username already exists")
-	}
 
 	user := domain.User{
 		ID:       uuid.New().String(),

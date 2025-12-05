@@ -1,7 +1,6 @@
 package application
 
 import (
-	"errors"
 	"fmt"
 	"visitor-management/internal/domain"
 	"visitor-management/internal/ports"
@@ -19,10 +18,22 @@ func NewUserService(repo ports.UserRepository) *UserService {
 
 func (s *UserService) GetallUsers() ([]domain.User, error) {
 	fmt.Println("UserService: calling repo.GetallUsers")
-	return s.repo.GetallUsers()
+	users, err := s.repo.GetallUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	var owners []domain.User
+	for _, u := range users {
+		if u.Role == "owner" {
+			owners = append(owners, u)
+		}
+	}
+
+	return owners, nil
 }
 
-func (s *UserService) GetUserByUsername(email string) (*domain.User, error) {
+func (s *UserService) GetUserByEmail(email string) (*domain.User, error) {
 	return s.repo.GetByEmail(email)
 }
 
@@ -32,30 +43,26 @@ func (s *UserService) CreateUser(user domain.User) error {
 	user.ID = uuid.New().String()
 	fmt.Println(user.ID)
 
-	exists, err := s.repo.UsernameExists(user.Username)
-	if err != nil {
-		return err
-	}
-	if exists {
-		return errors.New("username already exists")
-	}
-
 	return s.repo.Create(user)
 
 }
 
 func (s *UserService) GetUserById(userID string) (*domain.User, error) {
 	fmt.Printf("Fetching user with ID: %s\n", userID)
-
 	return s.repo.GetUserById(userID)
 }
 func (s *UserService) UpdateUser(user domain.User) error {
 	return s.repo.UpdateUser(user)
 }
 
-func (s *UserService) DeleteUser(username string) error {
-	return s.repo.Delete(username)
+func (s *UserService) DeleteUser(userId string) error {
+	return s.repo.Delete(userId)
 }
-func (s *UserService) GetUserCountByRole(role string) (int, error) {
-	return s.repo.CountUsersByRole(role)
+
+// func (s *UserService) GetUserCountByRole(role string) (int, error) {
+// 	return s.repo.CountUsersByRole(role)
+// }
+
+func (s *UserService) GetUsersCount() (usercounts domain.UsersCount, err error) {
+	return s.repo.GetUsersCount()
 }
