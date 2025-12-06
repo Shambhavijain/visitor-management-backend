@@ -11,13 +11,14 @@ type UserRepository interface {
 	GetUserById(userid string) (*domain.User, error)
 	GetOwnerByTowerAndFlat(tower string, flatNo string) (*domain.User, error)
 	GetUsersCount() (UserCount domain.UsersCount, err error)
+	CreateGatekeeper(gatekeeper domain.User)error
 }
 
 type GatekeeperRepository interface {
-	Create(gatekeeper domain.Gatekeeper) error
-	Update(gatekeeper domain.Gatekeeper) error
-	Delete(username string) error
-	GetallGatekeepers() ([]domain.Gatekeeper, error)
+	// Create(gatekeeper domain.User) error
+	// Update(gatekeeper domain.Gatekeeper) error
+	// Delete(username string) error
+	// GetallGatekeepers() ([]domain.Gatekeeper, error)
 }
 
 type VisitorRepository interface {

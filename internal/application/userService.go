@@ -46,7 +46,15 @@ func (s *UserService) CreateUser(user domain.User) error {
 	return s.repo.Create(user)
 
 }
+func (s *UserService) CreateGatekeeper(user domain.User) error {
+	fmt.Println("Reached service to create user")
 
+	user.ID = uuid.New().String()
+	fmt.Println(user.ID)
+
+	return s.repo.CreateGatekeeper(user)
+
+}
 func (s *UserService) GetUserById(userID string) (*domain.User, error) {
 	fmt.Printf("Fetching user with ID: %s\n", userID)
 	return s.repo.GetUserById(userID)

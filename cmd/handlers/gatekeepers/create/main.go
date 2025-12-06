@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"strings"
 	userRepository "visitor-management/internal/adapters/repository"
 	"visitor-management/internal/application"
@@ -49,17 +50,20 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 	if user.Role != "admin" {
 		return buildErrorResponse(403, "You are not authorized to create gatekeepers"), nil
 	}
+	fmt.Println("  RAW REQUEST BODY:", event.Body)
 
 	var gatekeeper domain.User
 	err = json.Unmarshal([]byte(event.Body), &gatekeeper)
 	if err != nil {
 		return buildErrorResponse(400, "Invalid JSON body"), nil
 	}
+	fmt.Printf(" Parsed Gatekeeper Object: %+v\n", gatekeeper)
 
 	gatekeeper.Role = "gatekeeper"
 
-	err = userSvc.CreateUser(gatekeeper)
+	err = userSvc.CreateGatekeeper(gatekeeper)
 	if err != nil {
+		log.Print(err)
 		return buildErrorResponse(500, "Failed to create gatekeeper"), nil
 	}
 

@@ -54,7 +54,18 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		return buildErrorResponse(500, "Failed to generate token"), nil
 	}
 
-	return buildSuccessResponse(200, "Login successful", map[string]string{"token": token}), nil
+	data := map[string]interface{}{
+		"token": token,
+		"role":  user.Role,
+	}
+
+	if user.Role == "owner" {
+		data["tower"] = user.Tower
+		data["flat_no"] = user.FlatNo
+	}
+
+	return buildSuccessResponse(200, "Login successful", data), nil
+
 }
 
 func buildErrorResponse(statusCode int, message string) events.APIGatewayProxyResponse {
@@ -70,7 +81,7 @@ func buildErrorResponse(statusCode int, message string) events.APIGatewayProxyRe
 	}
 }
 
-func buildSuccessResponse(statusCode int, message string, data map[string]string) events.APIGatewayProxyResponse {
+func buildSuccessResponse(statusCode int, message string, data map[string]any) events.APIGatewayProxyResponse {
 	resp := map[string]interface{}{
 		"status_code": statusCode,
 		"message":     message,

@@ -66,11 +66,21 @@ func UpdateVisitorStatusHandler(ctx context.Context, event events.APIGatewayProx
 	return buildSuccessResponse(200, "status updated successfully"), nil
 }
 func buildErrorResponse(status int, msg string) events.APIGatewayProxyResponse {
-	body, _ := json.Marshal(map[string]string{"message": msg})
-	return events.APIGatewayProxyResponse{StatusCode: status, Body: string(body)}
+    body, _ := json.Marshal(map[string]string{"message": msg})
+    return events.APIGatewayProxyResponse{
+        StatusCode: status,
+        Body:       string(body),
+        Headers:    map[string]string{}, // IMPORTANT
+    }
 }
 
+
 func buildSuccessResponse(status int, msg string) events.APIGatewayProxyResponse {
-	body, _ := json.Marshal(map[string]interface{}{"message": msg})
-	return events.APIGatewayProxyResponse{StatusCode: status, Body: string(body)}
+    body, _ := json.Marshal(map[string]interface{}{"message": msg})
+    return events.APIGatewayProxyResponse{
+        StatusCode: status,
+        Body:       string(body),
+        Headers:    map[string]string{}, // IMPORTANT
+    }
 }
+

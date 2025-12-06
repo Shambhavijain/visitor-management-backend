@@ -5,13 +5,13 @@ type User struct {
 	Username string `json:"username" dynamodbav:"Username"`
 	Role     string `json:"role"     dynamodbav:"Role"`
 	Email    string `json:"email"    dynamodbav:"Email"`
-	Password string `json:"-"        dynamodbav:"Password"`
+	Password string `json:"password,omitempty" dynamodbav:"Password"`
 	Address  string `json:"address"  dynamodbav:"Address"`
 	FlatNo   string `json:"flat_no"  dynamodbav:"Flat_no"`
 	Tower    string `json:"tower"    dynamodbav:"Tower"`
 }
 
 type UsersCount struct {
-    Owner      int `json:"owner"`
-    Gatekeeper int `json:"gatekeeper"`
+	Owner      int `json:"owner"`
+	Gatekeeper int `json:"gatekeeper"`
 }

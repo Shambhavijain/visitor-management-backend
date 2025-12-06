@@ -62,7 +62,7 @@ func (r *UserRepo) GetByEmail(email string) (*domain.User, error) {
 
 	log.Printf("User found: %+v", user)
 
-	return &user, nil
+	return r.GetUserById(user.ID)
 }
 
 func (r *UserRepo) Create(user domain.User) error {
@@ -361,4 +361,60 @@ func (r *UserRepo) countRole(role string) (int, error) {
 	}
 
 	return len(res.Items), nil
+}
+func (r *UserRepo) CreateGatekeeper(user domain.User) error {
+	log.Printf("Creating user: %+v", user)
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("failed to hash password: %w", err)
+	}
+
+	statement := fmt.Sprintf(
+		"INSERT INTO %s VALUE {'PK': ?, 'SK': ?, 'UserId': ?, 'Username': ?, 'Password': ?, 'Role': ?, 'Email': ?, 'Address': ?, 'Flat_no': ?, 'Tower': ?}",
+		r.tableName,
+	)
+	log.Printf("PartiQL statement: %s", statement)
+
+	userParams := []types.AttributeValue{
+		&types.AttributeValueMemberS{Value: "USERS"},
+		&types.AttributeValueMemberS{Value: "Users#" + user.ID},
+		&types.AttributeValueMemberS{Value: user.ID},
+		&types.AttributeValueMemberS{Value: user.Username},
+		&types.AttributeValueMemberS{Value: string(hashedPassword)},
+		&types.AttributeValueMemberS{Value: user.Role},
+		&types.AttributeValueMemberS{Value: user.Email},
+		&types.AttributeValueMemberS{Value: user.Address},
+		&types.AttributeValueMemberS{Value: user.FlatNo},
+		&types.AttributeValueMemberS{Value: user.Tower},
+	}
+
+	emailParams := []types.AttributeValue{
+		&types.AttributeValueMemberS{Value: "USERS"},
+		&types.AttributeValueMemberS{Value: "EMAIL#" + user.Email},
+		&types.AttributeValueMemberS{Value: user.ID},
+		&types.AttributeValueMemberS{Value: user.Username},
+		&types.AttributeValueMemberS{Value: string(hashedPassword)},
+		&types.AttributeValueMemberS{Value: user.Role},
+		&types.AttributeValueMemberS{Value: user.Email},
+		&types.AttributeValueMemberS{Value: user.Address},
+		&types.AttributeValueMemberS{Value: ""},
+		&types.AttributeValueMemberS{Value: ""},
+	}
+
+	transact := &dynamodb.ExecuteTransactionInput{
+		TransactStatements: []types.ParameterizedStatement{
+			{Statement: aws.String(statement), Parameters: userParams},
+			{Statement: aws.String(statement), Parameters: emailParams},
+		},
+	}
+
+	_, err = r.db.ExecuteTransaction(context.TODO(), transact)
+	if err != nil {
+		return fmt.Errorf("transaction failed: %w", err)
+	}
+
+	log.Printf("ERROR in Create(): %v", err)
+	log.Printf("User %s created successfully", user.Email)
+	return nil
 }
