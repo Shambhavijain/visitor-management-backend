@@ -70,7 +70,7 @@ func buildErrorResponse(status int, msg string) events.APIGatewayProxyResponse {
     return events.APIGatewayProxyResponse{
         StatusCode: status,
         Body:       string(body),
-        Headers:    map[string]string{}, // IMPORTANT
+        Headers:    map[string]string{}, 
     }
 }
 
@@ -80,7 +80,7 @@ func buildSuccessResponse(status int, msg string) events.APIGatewayProxyResponse
     return events.APIGatewayProxyResponse{
         StatusCode: status,
         Body:       string(body),
-        Headers:    map[string]string{}, // IMPORTANT
+        Headers:    map[string]string{},
     }
 }
 

@@ -33,7 +33,6 @@ func main() {
 
 func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.APIGatewayProxyResponse, error) {
 
-	
 	authHeader := event.Headers["Authorization"]
 	if authHeader == "" {
 		return buildErrorResponse(401, "Authorization header missing"), nil
@@ -49,7 +48,6 @@ func Handler(ctx context.Context, event events.APIGatewayProxyRequest) (events.A
 		return buildErrorResponse(403, "You are not authorized to create gatekeepers"), nil
 	}
 
-	
 	gatekeepers, err := userSvc.GetAllGatekeepers()
 	if err != nil {
 		return buildErrorResponse(500, "Failed to fetch gatekeepers"), nil

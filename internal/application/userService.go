@@ -67,9 +67,7 @@ func (s *UserService) DeleteUser(userId string) error {
 	return s.repo.Delete(userId)
 }
 
-// func (s *UserService) GetUserCountByRole(role string) (int, error) {
-// 	return s.repo.CountUsersByRole(role)
-// }
+
 
 func (s *UserService) GetUsersCount() (usercounts domain.UsersCount, err error) {
 	return s.repo.GetUsersCount()

@@ -10,5 +10,5 @@ type Visitor struct {
 	Status      string `json:"status"`
 	OwnerEmail  string `json:"owner_email"`
 	OwnerID     string `json:"owner_id"`
-	CreatedAt   int64  `json:"created_at"` // int64 (Unix)
+	CreatedAt   int64  `json:"created_at"` 
 }

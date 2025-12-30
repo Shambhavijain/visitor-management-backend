@@ -43,6 +43,3 @@ func (s *GatekeeperService) GetAllGatekeepers() ([]domain.User, error) {
 
     return gatekeepers, nil
 }
-// func (s *GatekeeperService)CountGatekeeperByRole(role string)(int, error){
-// return s.Repo.CountGatekeeperByRole(role)
-// }

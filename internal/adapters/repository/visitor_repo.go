@@ -18,7 +18,7 @@ func NewVisitorRepo(db *dynamodb.Client, tableName string) *VisitorRepo {
 	return &VisitorRepo{db: db, tableName: tableName}
 }
 
-// CREATE VISITOR
+
 func (r *VisitorRepo) Create(v *domain.Visitor) error {
 
 	query := fmt.Sprintf(`

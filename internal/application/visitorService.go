@@ -20,7 +20,7 @@ func NewVisitorService(repo ports.VisitorRepository, UserRepo ports.UserReposito
 
 func (s *VisitorService) CreateVisitor(v *domain.Visitor, userID string, role string) (*domain.Visitor, error) {
 
-	v.ID = uuid.New().String() // visitor_id
+	v.ID = uuid.New().String() 
 	v.CreatedAt = time.Now().Unix()
 	v.AddedByRole = role
 
@@ -51,13 +51,13 @@ func (s *VisitorService) CreateVisitor(v *domain.Visitor, userID string, role st
 		v.Status = "pending"
 	}
 
-	// Save to DynamoDB
+	
 	err := s.Repo.Create(v)
 	if err != nil {
 		return nil, err
 	}
 
-	// Return the full visitor object including ID
+	
 	return v, nil
 }
 

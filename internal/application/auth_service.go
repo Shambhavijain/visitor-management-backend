@@ -22,11 +22,9 @@ func (s *AuthService) Login(email, password string) (*domain.User, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Debugging: Print the hashed password from the database
-	fmt.Printf("Stored hashed password: %s\n", user.Password)
-
-	// Debugging: Print the plain password provided in the request
-	fmt.Printf("Provided password: %s\n", password)
+	
+	// fmt.Printf("Stored hashed password: %s\n", user.Password)
+	// fmt.Printf("Provided password: %s\n", password)
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
