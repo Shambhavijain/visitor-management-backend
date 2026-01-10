@@ -40,11 +40,8 @@ def test_create_visitor_owner_not_found(visitor_service, mock_user_repo):
         flat_no="101",
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.UserNotFoundError):
         visitor_service.create_visitor(req, "o1", UserRole.OWNER)
-
-    assert exc.value.status_code == 404
-    assert exc.value.detail == "Owner not found"
 
 
 def test_create_visitor_admin_success(visitor_service, mock_user_repo):
@@ -93,13 +90,13 @@ def test_create_visitor_gatekeeper_owner_not_found(visitor_service, mock_user_re
         flat_no="101",
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.UserNotFoundError):
         visitor_service.create_visitor(req, "gk1", UserRole.GATEKEEPER)
 
-    assert exc.value.status_code == 404
 
-
-def test_create_visitor_repo_error(visitor_service, mock_user_repo, mock_visitor_repo):
+def test_create_visitor_repo_error(
+    visitor_service, mock_user_repo, mock_visitor_repo
+):
     owner = Mock(ID="o1", Email="owner@test.com")
     mock_user_repo.get_user_by_id.return_value = owner
     mock_visitor_repo.create.side_effect = error.RepositoryError("db")
@@ -111,30 +108,29 @@ def test_create_visitor_repo_error(visitor_service, mock_user_repo, mock_visitor
         flat_no="101",
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         visitor_service.create_visitor(req, "o1", UserRole.OWNER)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to create visitor"
+    assert str(exc.value) == "db"
 
 
-def test_create_visitor_repo_error(visitor_service, mock_user_repo, mock_visitor_repo):
-    owner = Mock(ID="o1", Email="owner@test.com")
-    mock_user_repo.get_user_by_id.return_value = owner
-    mock_visitor_repo.create.side_effect = error.RepositoryError("db")
+# def test_create_visitor_repo_error(visitor_service, mock_user_repo, mock_visitor_repo):
+#     owner = Mock(ID="o1", Email="owner@test.com")
+#     mock_user_repo.get_user_by_id.return_value = owner
+#     mock_visitor_repo.create.side_effect = error.RepositoryError("db")
 
-    req = CreateVisitorRequest(
-        name="visitor",
-        email="v@test.com",
-        tower="A",
-        flat_no="101",
-    )
+#     req = CreateVisitorRequest(
+#         name="visitor",
+#         email="v@test.com",
+#         tower="A",
+#         flat_no="101",
+#     )
 
-    with pytest.raises(HTTPException) as exc:
-        visitor_service.create_visitor(req, "o1", UserRole.OWNER)
+#     with pytest.raises(HTTPException) as exc:
+#         visitor_service.create_visitor(req, "o1", UserRole.OWNER)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to create visitor"
+#     assert exc.value.status_code == 500
+#     assert exc.value.detail == "Failed to create visitor"
 
 
 def test_get_all_visitors(visitor_service, mock_visitor_repo):
@@ -201,20 +197,20 @@ def test_get_count_visitors_by_owner(visitor_service, mock_visitor_repo):
 def test_update_visitor_status_not_found(visitor_service, mock_visitor_repo):
     mock_visitor_repo.update_visitor_status.side_effect = error.NotFoundError()
 
-    with pytest.raises(HTTPException) as exc:
-        visitor_service.update_visitor_status("v1", "o1", VisitorStatus.APPROVED)
-
-    assert exc.value.status_code == 404
-    assert exc.value.detail == "Visitor not found"
+    with pytest.raises(error.NotFoundError):
+        visitor_service.update_visitor_status(
+            "v1", "o1", VisitorStatus.APPROVED
+        )
 
 
 def test_update_visitor_status_repo_error(visitor_service, mock_visitor_repo):
     mock_visitor_repo.update_visitor_status.side_effect = error.RepositoryError("db")
 
-    with pytest.raises(HTTPException) as exc:
-        visitor_service.update_visitor_status("v1", "o1", VisitorStatus.APPROVED)
+    with pytest.raises(error.RepositoryError):
+        visitor_service.update_visitor_status(
+            "v1", "o1", VisitorStatus.APPROVED
+        )
 
-    assert exc.value.status_code == 500
 
 
 def test_update_visitor_status_success(visitor_service, mock_visitor_repo):

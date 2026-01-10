@@ -13,13 +13,8 @@ class GatekeeperService:
         self.user_repo = user_repo
 
     def get_all_gatekeepers(self) -> list[GatekeeperOut]:
-        try:
-            users = self.user_repo.get_all_users()
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to fetch users",
-            ) from e
+
+        users = self.user_repo.get_all_users()
 
         gatekeepers = [u for u in users if u.Role == UserRole.GATEKEEPER]
 
@@ -44,11 +39,6 @@ class GatekeeperService:
                 )
         except error.NotFoundError:
             pass
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to check existing email",
-            ) from e
 
         user = User(
             ID=str(uuid.uuid4()),
@@ -61,13 +51,7 @@ class GatekeeperService:
             Tower=None,
         )
 
-        try:
-            self.user_repo.create(user)
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create gatekeeper",
-            ) from e
+        self.user_repo.create(user)
 
         return GatekeeperOut(
             id=user.ID,
@@ -78,13 +62,7 @@ class GatekeeperService:
         )
 
     def delete_gatekeeper(self, gatekeeper_id: str) -> None:
-        try:
-            user = self.user_repo.get_user_by_id(gatekeeper_id)
-        except error.NotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Gatekeeper not found",
-            )
+        user = self.user_repo.get_user_by_id(gatekeeper_id)
 
         if user.Role != UserRole.GATEKEEPER:
             raise HTTPException(
@@ -92,22 +70,10 @@ class GatekeeperService:
                 detail="User is not a gatekeeper",
             )
 
-        try:
-            self.user_repo.delete(gatekeeper_id)
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to delete gatekeeper",
-            ) from e
+        self.user_repo.delete(gatekeeper_id)
 
     def get_gatekeeper_by_id(self, gatekeeper_id: str) -> GatekeeperOut:
-        try:
-            user = self.user_repo.get_user_by_id(gatekeeper_id)
-        except error.NotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Gatekeeper not found",
-            )
+        user = self.user_repo.get_user_by_id(gatekeeper_id)
 
         if user.Role != UserRole.GATEKEEPER:
             raise HTTPException(
@@ -120,5 +86,9 @@ class GatekeeperService:
             username=user.Username,
             email=user.Email,
             address=user.Address,
-            role=UserRole(user.Role) if not isinstance(user.Role, UserRole) else user.Role,
+            role=(
+                UserRole(user.Role)
+                if not isinstance(user.Role, UserRole)
+                else user.Role
+            ),
         )

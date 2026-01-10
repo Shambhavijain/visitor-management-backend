@@ -32,7 +32,9 @@ class UserRepository(ABC):
 
 class DDBUserRepository(UserRepository):
 
-    def __init__(self, ddb_resource: boto3.resources.base.ServiceResource, table_name: str):
+    def __init__(
+        self, ddb_resource: boto3.resources.base.ServiceResource, table_name: str
+    ):
         self.table = ddb_resource.Table(table_name)
 
     def get_by_email(self, email: str) -> User:
@@ -62,7 +64,7 @@ class DDBUserRepository(UserRepository):
 
         item = resp.get("Item")
         if not item:
-            raise error.NotFoundError("user not found")
+            raise error.NotFoundError("entity not found")
 
         return User.from_ddb(item)
 
@@ -79,7 +81,11 @@ class DDBUserRepository(UserRepository):
                                 "UserId": user.ID,
                                 "Username": user.Username,
                                 "Password": user.Password,
-                               "Role": user.Role.value if hasattr(user.Role, "value") else user.Role,
+                                "Role": (
+                                    user.Role.value
+                                    if hasattr(user.Role, "value")
+                                    else user.Role
+                                ),
                                 "Email": user.Email,
                                 "Address": user.Address,
                                 "Flat_no": user.FlatNo,
@@ -95,7 +101,6 @@ class DDBUserRepository(UserRepository):
                                 "SK": f"EMAIL#{user.Email.lower()}",
                                 "UserId": user.ID,
                             },
-                           
                             "ConditionExpression": "attribute_not_exists(SK)",
                         }
                     },
@@ -115,40 +120,41 @@ class DDBUserRepository(UserRepository):
             raise error.RepositoryError("failed to create user") from e
 
     def create_gatekeeper(self, user: User) -> None:
-        try:
-            self.table.meta.client.transact_write_items(
-                TransactItems=[
-                    {
-                        "Put": {
-                            "TableName": self.table.name,
-                            "Item": {
-                                "PK": "USERS",
-                                "SK": f"Users#{user.ID}",
-                                "UserId": user.ID,
-                                "Username": user.Username,
-                                "Password": user.Password,
-                                "Role": user.Role.value if hasattr(user.Role, "value") else user.Role,
-                                "Email": user.Email,
-                                "Address": user.Address,
-                                "Flat_no": user.FlatNo,
-                                "Tower": user.Tower,
-                            },
-                        }
-                    },
-                    {
-                        "Put": {
-                            "TableName": self.table.name,
-                            "Item": {
-                                "PK": "USERS",
-                                "SK": f"EMAIL#{user.Email.lower()}",
-                                "UserId": user.ID,
-                            },
-                        }
-                    },
-                ]
-            )
-        except ClientError as e:
-            raise error.RepositoryError("failed to create gatekeeper") from e
+        self.table.meta.client.transact_write_items(
+            TransactItems=[
+                {
+                    "Put": {
+                        "TableName": self.table.name,
+                        "Item": {
+                            "PK": "USERS",
+                            "SK": f"Users#{user.ID}",
+                            "UserId": user.ID,
+                            "Username": user.Username,
+                            "Password": user.Password,
+                            "Role": (
+                                user.Role.value
+                                if hasattr(user.Role, "value")
+                                else user.Role
+                            ),
+                            "Email": user.Email,
+                            "Address": user.Address,
+                            "Flat_no": user.FlatNo,
+                            "Tower": user.Tower,
+                        },
+                    }
+                },
+                {
+                    "Put": {
+                        "TableName": self.table.name,
+                        "Item": {
+                            "PK": "USERS",
+                            "SK": f"EMAIL#{user.Email.lower()}",
+                            "UserId": user.ID,
+                        },
+                    }
+                },
+            ]
+        )
 
     def delete(self, user_id: str) -> None:
         user = self.get_user_by_id(user_id)
@@ -183,13 +189,7 @@ class DDBUserRepository(UserRepository):
                 }
             )
 
-        try:
-            self.table.meta.client.transact_write_items(
-                TransactItems=transact_items
-            )
-        except ClientError as e:
-            raise error.RepositoryError("failed to delete user") from e
-
+        self.table.meta.client.transact_write_items(TransactItems=transact_items)
 
     def get_all_users(self) -> List[User]:
         resp = self.table.query(
@@ -211,47 +211,41 @@ class DDBUserRepository(UserRepository):
 
         return self.get_user_by_id(item["UserId"])
 
- 
     def get_users_count(self) -> UsersCount:
-        try:
-            owner_count = 0
-            gatekeeper_count = 0
-            last_evaluated_key = None
-            
-            while True:
-                query_kwargs = {
-                    "KeyConditionExpression": (
-                        Key("PK").eq("USERS") &
-                        Key("SK").begins_with("Users#")
-                        ),
-                    "ProjectionExpression": "#r",
-                    "ExpressionAttributeNames": {
-                        "#r": "Role",
-                        },
-                    }
-                    
-                if last_evaluated_key:
-                    query_kwargs["ExclusiveStartKey"] = last_evaluated_key
 
-                resp = self.table.query(**query_kwargs)
-                print("ITEMS:", resp.get("Items"))
+        owner_count = 0
+        gatekeeper_count = 0
+        last_evaluated_key = None
 
-                for item in resp.get("Items", []):
-                    role = item.get("Role")
-                    if role == UserRole.OWNER.value:
-                        owner_count += 1
-                    elif role == UserRole.GATEKEEPER.value:
-                        gatekeeper_count += 1
+        while True:
+            query_kwargs = {
+                "KeyConditionExpression": (
+                    Key("PK").eq("USERS") & Key("SK").begins_with("Users#")
+                ),
+                "ProjectionExpression": "#r",
+                "ExpressionAttributeNames": {
+                    "#r": "Role",
+                },
+            }
 
-                last_evaluated_key = resp.get("LastEvaluatedKey")
-                if not last_evaluated_key:
-                    break
+            if last_evaluated_key:
+                query_kwargs["ExclusiveStartKey"] = last_evaluated_key
 
-            return UsersCount(
-                Owner=owner_count,
-                Gatekeeper=gatekeeper_count,
-            )
+            resp = self.table.query(**query_kwargs)
+            print("ITEMS:", resp.get("Items"))
 
-        except ClientError as e:
-            raise error.RepositoryError("failed to count users") from e
+            for item in resp.get("Items", []):
+                role = item.get("Role")
+                if role == UserRole.OWNER.value:
+                    owner_count += 1
+                elif role == UserRole.GATEKEEPER.value:
+                    gatekeeper_count += 1
 
+            last_evaluated_key = resp.get("LastEvaluatedKey")
+            if not last_evaluated_key:
+                break
+
+        return UsersCount(
+            Owner=owner_count,
+            Gatekeeper=gatekeeper_count,
+        )

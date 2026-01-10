@@ -24,9 +24,10 @@ from src.constants.role_enum import UserRole
 
 @pytest.fixture(scope="session")
 def client():
-    with TestClient(app) as c:
+    with TestClient(app, raise_server_exceptions=False) as c:
         yield c
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def override_current_user():
@@ -41,6 +42,7 @@ def override_current_user():
     yield
     app.dependency_overrides.clear()
 
+
 @pytest.fixture
 def override_current_user_admin():
     app.dependency_overrides[get_current_user] = lambda: {
@@ -49,8 +51,6 @@ def override_current_user_admin():
     }
     yield
     app.dependency_overrides.clear()
-
-
 
 
 @pytest.fixture

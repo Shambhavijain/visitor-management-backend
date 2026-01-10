@@ -133,7 +133,7 @@ def test_delete_user_internal_error(
     response = client.delete("/users/123")
 
     assert response.status_code == 500
-    assert response.json()["message"] == "Internal Server Error"
+    assert response.json()["message"] == "Unexpected error occurred"
 
 
 def test_get_users_count_success(

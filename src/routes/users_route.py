@@ -67,18 +67,8 @@ def delete_user(
     user_service: UserService = Depends(get_user_service),
     _=Depends(get_current_user),
 ):
-    try:
-        user_service.delete_user(user_id)
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
-    except Exception:
-        return Response.error_response(
-            message="Internal Server Error",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
+
+    user_service.delete_user(user_id)
 
     return Response.success_response(
         data=None,
@@ -96,13 +86,8 @@ def get_users_count(
     user_service: UserService = Depends(get_user_service),
     _=Depends(get_current_user),
 ):
-    try:
-        count = user_service.get_users_count()
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
+
+    count = user_service.get_users_count()
 
     return Response.success_response(
         data=count,
@@ -121,13 +106,7 @@ def list_users(
     _=Depends(get_current_user),
 ):
 
-    try:
-        users = user_service.get_all_users()
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
+    users = user_service.get_all_users()
 
     return Response.success_response(
         data=users,
@@ -147,13 +126,7 @@ def get_user_by_id(
     _=Depends(get_current_user),
 ):
 
-    try:
-        user = user_service.get_user_by_id(user_id)
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
+    user = user_service.get_user_by_id(user_id)
 
     return Response.success_response(
         data=user,

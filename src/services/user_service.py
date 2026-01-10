@@ -47,19 +47,9 @@ class UserService:
         self.user_repo.update_user(user)
 
     def delete_user(self, user_id: str) -> None:
-        try:
-            self.user_repo.delete(user_id)
-        except error.UserNotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="User not found",
-            )
+
+        self.user_repo.delete(user_id)
 
     def get_users_count(self) -> UsersCount:
-        try:
-            return self.user_repo.get_users_count()
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to fetch users count",
-            ) from e
+
+        return self.user_repo.get_users_count()

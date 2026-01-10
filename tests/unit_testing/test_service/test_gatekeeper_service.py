@@ -30,11 +30,10 @@ def test_get_all_gatekeepers_success(gatekeeper_service, mock_user_repo):
 def test_get_all_gatekeepers_repo_error(gatekeeper_service, mock_user_repo):
     mock_user_repo.get_all_users.side_effect = error.RepositoryError("db error")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         gatekeeper_service.get_all_gatekeepers()
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to fetch users"
+    assert str(exc.value) == "db error"
 
 
 def test_create_gatekeeper_email_exists(gatekeeper_service, mock_user_repo):
@@ -64,11 +63,10 @@ def test_create_gatekeeper_check_email_repo_error(gatekeeper_service, mock_user_
         address="addressgk",
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         gatekeeper_service.create_gatekeeper(req)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to check existing email"
+    assert str(exc.value) == "db error"
 
 
 @patch("src.services.gatekeeper_service.hash_password", return_value="hashed")
@@ -83,11 +81,10 @@ def test_create_gatekeeper_create_repo_error(_, gatekeeper_service, mock_user_re
         address="addressgk",
     )
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         gatekeeper_service.create_gatekeeper(req)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to create gatekeeper"
+    assert str(exc.value) == "db error"
 
 
 @patch("src.services.gatekeeper_service.hash_password", return_value="hashed")
@@ -112,11 +109,10 @@ def test_create_gatekeeper_success(_, gatekeeper_service, mock_user_repo):
 def test_delete_gatekeeper_not_found(gatekeeper_service, mock_user_repo):
     mock_user_repo.get_user_by_id.side_effect = error.NotFoundError("not found")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.NotFoundError) as exc:
         gatekeeper_service.delete_gatekeeper("id")
 
-    assert exc.value.status_code == 404
-    assert exc.value.detail == "Gatekeeper not found"
+    assert str(exc.value) == "not found"
 
 
 def test_delete_gatekeeper_not_gatekeeper(gatekeeper_service, mock_user_repo):
@@ -135,11 +131,10 @@ def test_delete_gatekeeper_repo_error(gatekeeper_service, mock_user_repo):
     mock_user_repo.get_user_by_id.return_value = user
     mock_user_repo.delete.side_effect = error.RepositoryError("db error")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         gatekeeper_service.delete_gatekeeper("id")
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to delete gatekeeper"
+    assert str(exc.value) == "db error"
 
 
 def test_delete_gatekeeper_success(gatekeeper_service, mock_user_repo):
@@ -154,10 +149,10 @@ def test_delete_gatekeeper_success(gatekeeper_service, mock_user_repo):
 def test_get_gatekeeper_by_id_not_found(gatekeeper_service, mock_user_repo):
     mock_user_repo.get_user_by_id.side_effect = error.NotFoundError("not found")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.NotFoundError) as exc:
         gatekeeper_service.get_gatekeeper_by_id("id")
 
-    assert exc.value.status_code == 404
+    assert str(exc.value) == "not found"
 
 
 def test_get_gatekeeper_by_id_not_gatekeeper(gatekeeper_service, mock_user_repo):

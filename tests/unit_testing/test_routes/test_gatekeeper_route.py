@@ -76,7 +76,7 @@ def test_create_gatekeeper_internal_error(
     response = client.post("/gatekeeper/create", json=payload)
 
     assert response.status_code == 500
-    assert response.json()["message"] == "Internal Server Error"
+    assert response.json()["message"] == "Unexpected error occurred"
 
 
 def test_list_gatekeepers_success(
@@ -128,7 +128,7 @@ def test_list_gatekeepers_internal_error(
     response = client.get("/gatekeeper/")
 
     assert response.status_code == 500
-    assert response.json()["message"] == "Internal Server Error"
+    assert response.json()["message"] == "Unexpected error occurred"
 
 
 def test_get_gatekeeper_by_id_success(
@@ -178,6 +178,7 @@ def test_get_gatekeeper_by_id_internal_error(
     response = client.get("/gatekeeper/123")
 
     assert response.status_code == 500
+    assert response.json()["message"] == "Unexpected error occurred"
 
 
 def test_delete_gatekeeper_success(
@@ -219,4 +220,4 @@ def test_delete_gatekeeper_internal_error(
     response = client.delete("/gatekeeper/123")
 
     assert response.status_code == 500
-    assert response.json()["message"] == "Internal Server Error"
+    assert response.json()["message"] == "Unexpected error occurred"

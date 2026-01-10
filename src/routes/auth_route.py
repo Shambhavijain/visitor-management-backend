@@ -16,44 +16,22 @@ def sign_up(
     user_request: SignUpUser,
     auth_service: AuthService = Depends(get_auth_service),
 ):
-    # try:
-        auth_service.signup(user_request)
-    # except HTTPException as exc:
-    #     return Response.error_response(
-    #         message=exc.detail,
-    #         status_code=exc.status_code,
-    #     )
-    # except Exception:
-    #     return Response.error_response(
-    #         message="Internal Server Error",
-    #         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-    #     )
 
-    # return Response.success_response(
-    #     data=None,
-    #     message="User created successfully",
-    #     status_code=HTTPStatus.CREATED,
-    # )
+    auth_service.signup(user_request)
+
+    return Response.success_response(
+        data=None,
+        message="User created successfully",
+        status_code=HTTPStatus.CREATED,
+    )
 
 
 @auth_router.post("/login", status_code=status.HTTP_200_OK)
 def login(
     login_request: LoginUser,
     auth_service: AuthService = Depends(get_auth_service),
-
 ):
-    try:
-        response = auth_service.login(login_request)
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
-    except Exception:
-        return Response.error_response(
-            message="Internal Server Error",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
+    response = auth_service.login(login_request)
 
     return Response.success_response(
         data=response,

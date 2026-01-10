@@ -5,7 +5,17 @@ from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from httpx import Request
+from src.errors.error import (
+    NotFoundError,
+    AppError,
+    RepositoryError,
+    ServiceError,
+    AuthenticationError,
+    AuthorizationError,
+    UserNotFoundError,
+)
 
+import src.errors.error_handlers as err_handlers
 
 from src.repository.user_repository import DDBUserRepository
 from src.repository.visitor_repository import DDBVisitorRepository
@@ -49,7 +59,16 @@ def generic_exc_handler(request: Request, exc: Exception):
     )
 
 
-app.add_exception_handler(Exception, generic_exc_handler)
+app.add_exception_handler(HTTPException, err_handlers.handle_http_exception)
+app.add_exception_handler(NotFoundError, err_handlers.handle_notfound_error)
+app.add_exception_handler(ServiceError, err_handlers.handle_service_error)
+app.add_exception_handler(AppError, err_handlers.handle_app_error)
+app.add_exception_handler(RepositoryError, err_handlers.handle_repository_error)
+app.add_exception_handler(AuthenticationError, err_handlers.handle_authentication_error)
+app.add_exception_handler(AuthorizationError, err_handlers.handle_authorization_error)
+app.add_exception_handler(UserNotFoundError, err_handlers.handle_usernotfound_error)
+app.add_exception_handler(Exception, err_handlers.generic_exc_handler)
+
 
 app.include_router(auth_router)
 app.include_router(users_route.user_router)

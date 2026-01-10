@@ -1,7 +1,6 @@
 import pytest
 from unittest.mock import Mock, patch
 from fastapi import HTTPException
-from datetime import datetime, timezone
 
 from src.services.auth_service import AuthService
 from src.dto.auth_dto import SignUpUser, LoginUser
@@ -21,7 +20,9 @@ def test_signup_success(auth_service, mock_user_repo):
     )
 
     mock_user_repo.get_by_email.side_effect = error.NotFoundError("not found")
+
     auth_service.signup(request)
+
     mock_user_repo.create.assert_called_once()
 
 
@@ -56,11 +57,10 @@ def test_signup_repo_error_on_email_check(auth_service, mock_user_repo):
 
     mock_user_repo.get_by_email.side_effect = error.RepositoryError("ddb down")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         auth_service.signup(request)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to check existing email"
+    assert str(exc.value) == "ddb down"
 
 
 def test_signup_create_user_failure(auth_service, mock_user_repo):
@@ -76,11 +76,10 @@ def test_signup_create_user_failure(auth_service, mock_user_repo):
     mock_user_repo.get_by_email.side_effect = error.NotFoundError("not found")
     mock_user_repo.create.side_effect = error.RepositoryError("ddb error")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         auth_service.signup(request)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to create user"
+    assert str(exc.value) == "ddb error"
 
 
 @patch("src.services.auth_service.generate_jwt")
@@ -122,11 +121,8 @@ def test_login_invalid_email(auth_service, mock_user_repo):
 
     request = LoginUser(email="wrong@test.com", password="password")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.NotFoundError):
         auth_service.login(request)
-
-    assert exc.value.status_code == 401
-    assert exc.value.detail == "Invalid email or password"
 
 
 @patch("src.services.auth_service.verify_password")
@@ -152,8 +148,7 @@ def test_login_repository_error(auth_service, mock_user_repo):
 
     request = LoginUser(email="john@test.com", password="password")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         auth_service.login(request)
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Login failed"
+    assert str(exc.value) == "ddb error"

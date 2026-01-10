@@ -24,11 +24,6 @@ class AuthService:
                 )
         except error.NotFoundError:
             pass
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to check existing email",
-            ) from e
         user = User(
             ID=str(uuid.uuid4()),
             Username=request.Name,
@@ -40,27 +35,10 @@ class AuthService:
             Tower=request.Tower,
         )
 
-        try:
-            self.user_repo.create(user)
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create user",
-            ) from e
+        self.user_repo.create(user)
 
     def login(self, request: LoginUser) -> dict:
-        try:
-            user = self.user_repo.get_by_email(request.email.lower())
-        except error.NotFoundError:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid email or password",
-            )
-        except error.RepositoryError as e:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Login failed",
-            ) from e
+        user = self.user_repo.get_by_email(request.email.lower())
 
         if not verify_password(request.password, user.Password):
             raise HTTPException(

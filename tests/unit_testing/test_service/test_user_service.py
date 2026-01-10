@@ -74,11 +74,10 @@ def test_update_user_calls_repo(user_service, mock_user_repo):
 def test_delete_user_not_found(user_service, mock_user_repo):
     mock_user_repo.delete.side_effect = error.UserNotFoundError("not found")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.UserNotFoundError) as exc:
         user_service.delete_user("user-id")
 
-    assert exc.value.status_code == 404
-    assert exc.value.detail == "User not found"
+    assert str(exc.value) == "not found"
 
 
 def test_delete_user_success(user_service, mock_user_repo):
@@ -90,11 +89,10 @@ def test_delete_user_success(user_service, mock_user_repo):
 def test_get_users_count_repo_error(user_service, mock_user_repo):
     mock_user_repo.get_users_count.side_effect = error.RepositoryError("ddb error")
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(error.RepositoryError) as exc:
         user_service.get_users_count()
 
-    assert exc.value.status_code == 500
-    assert exc.value.detail == "Failed to fetch users count"
+    assert str(exc.value) == "ddb error"
 
 
 def test_get_users_count_success(user_service, mock_user_repo):

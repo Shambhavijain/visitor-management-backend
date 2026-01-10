@@ -23,18 +23,7 @@ def create_gatekeeper(
     gatekeeper_service: GatekeeperService = Depends(get_gatekeeper_service),
 ):
 
-    try:
-        gatekeeper = gatekeeper_service.create_gatekeeper(req)
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
-    except Exception:
-        return Response.error_response(
-            message="Internal Server Error",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
+    gatekeeper = gatekeeper_service.create_gatekeeper(req)
 
     return Response.success_response(
         data=gatekeeper,
@@ -52,18 +41,7 @@ def list_gatekeepers(
     gatekeeper_service: GatekeeperService = Depends(get_gatekeeper_service),
 ):
 
-    try:
-        gatekeepers = gatekeeper_service.get_all_gatekeepers()
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
-    except Exception:
-        return Response.error_response(
-            message="Internal Server Error",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
+    gatekeepers = gatekeeper_service.get_all_gatekeepers()
 
     return Response.success_response(
         data=gatekeepers,
@@ -82,18 +60,7 @@ def get_gatekeeper_by_id(
     gatekeeper_service: GatekeeperService = Depends(get_gatekeeper_service),
 ):
 
-    try:
-        gatekeeper = gatekeeper_service.get_gatekeeper_by_id(user_id)
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
-    except Exception:
-        return Response.error_response(
-            message="Internal Server Error",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
+    gatekeeper = gatekeeper_service.get_gatekeeper_by_id(user_id)
 
     return Response.success_response(
         data=gatekeeper,
@@ -112,18 +79,7 @@ def delete_gatekeeper(
     gatekeeper_service: GatekeeperService = Depends(get_gatekeeper_service),
 ):
 
-    try:
-        gatekeeper_service.delete_gatekeeper(user_id)
-    except HTTPException as exc:
-        return Response.error_response(
-            message=exc.detail,
-            status_code=exc.status_code,
-        )
-    except Exception:
-        return Response.error_response(
-            message="Internal Server Error",
-            status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
-        )
+    gatekeeper_service.delete_gatekeeper(user_id)
 
     return Response.success_response(
         data=None,

@@ -76,7 +76,7 @@ def test_create_visitor_internal_error(
     res = client.post("/visitor/create", json=payload)
 
     assert res.status_code == 500
-    assert res.json()["message"] == "Internal Server Error"
+    assert res.json()["message"] == "Unexpected error occurred"
 
 
 def test_get_all_visitors_owner(
@@ -115,7 +115,7 @@ def test_get_all_visitors_error(
     res = client.get("/visitor/")
 
     assert res.status_code == 500
-    assert res.json()["message"] == "Failed to fetch visitors"
+    assert res.json()["message"] == "Unexpected error occurred"
 
 
 def test_get_visitors_count_owner(
@@ -170,7 +170,7 @@ def test_get_visitors_count_error(
     res = client.get("/visitor/count")
 
     assert res.status_code == 500
-    assert res.json()["message"] == "Failed to fetch visitor count"
+    assert res.json()["message"] == "Unexpected error occurred"
 
 
 def test_get_visitors_by_owner_success(
@@ -196,7 +196,7 @@ def test_get_visitors_by_owner_error(
     res = client.get("/visitor/owner")
 
     assert res.status_code == 500
-    assert res.json()["message"] == "Failed to fetch owner visitors"
+    assert res.json()["message"] == "Unexpected error occurred"
 
 
 def test_update_visitor_status_success(
@@ -228,7 +228,7 @@ def test_update_visitor_status_internal_error(
     )
 
     assert res.status_code == 500
-    assert res.json()["message"] == "Internal Server Error"
+    assert res.json()["message"] == "Unexpected error occurred"
 
 
 def test_get_all_visitors_http_exception(
