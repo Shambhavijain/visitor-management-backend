@@ -13,7 +13,8 @@ from src.services.visitor_service import VisitorService
 from src.dto.visitor_dto import UpdateVisitorRequest, CreateVisitorRequest
 from src.response.response import Response
 from src.constants.role_enum import UserRole
-
+from dependencies import get_sns_client
+from src.constants.constants import sns_arn
 
 visitor_router = APIRouter(prefix="/visitor", tags=["Visitors"])
 
@@ -25,14 +26,16 @@ def create_visitor(
     payload=Depends(get_current_user),
 ):
 
-    
     visitor = visitor_service.create_visitor(
         req=req,
         user_id=payload["sub"],
         role=payload["role"],
     )
-   
-
+    sns_client = get_sns_client()
+    sns_client.publish(
+        TopicArn=sns_arn,
+        Message="Hello Visitor is arrived. Please, check your dashboard.",
+    )
     return Response.success_response(
         data=visitor,
         message="Visitor created successfully",
@@ -46,7 +49,6 @@ def get_all_visitors(
     payload=Depends(get_current_user),
 ):
 
-    
     role = payload["role"]
     user_id = payload["sub"]
     if role == UserRole.OWNER:
@@ -54,8 +56,6 @@ def get_all_visitors(
     else:
 
         visitors = visitor_service.get_all_visitors()
-
-    
 
     return Response.success_response(
         data=visitors,
@@ -96,7 +96,7 @@ def get_visitors_by_owner(
 ):
     owner_id = payload["sub"]
     visitors = visitor_service.get_visitors_by_owner(owner_id)
-    
+
     return Response.success_response(
         data=visitors,
         message="Owner visitors fetched successfully",
@@ -115,13 +115,11 @@ def update_visitor_status(
     payload=Depends(get_current_user),
 ):
 
-   
     visitor_service.update_visitor_status(
         visitor_id=req.visitor_id,
         owner_id=payload["sub"],
         status_value=req.status,
     )
-
 
     return Response.success_response(
         data=None,

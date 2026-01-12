@@ -7,6 +7,11 @@ from src.services.gatekeeper_service import GatekeeperService
 from src.services.visitor_service import VisitorService
 from src.utils import utils
 from src.constants.role_enum import UserRole
+import boto3
+
+
+def get_sns_client():
+    return boto3.client("sns", region_name="us-east-1")
 
 
 def get_user_repository(request: Request) -> UserRepository:

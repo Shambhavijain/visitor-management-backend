@@ -111,6 +111,8 @@ class DDBUserRepository(UserRepository):
                                 "PK": "USERS",
                                 "SK": f"Tower#{user.Tower}#Flat_no#{user.FlatNo}",
                                 "UserId": user.ID,
+                                "Flat_no": user.FlatNo,
+                                "Tower": user.Tower,
                             },
                         }
                     },
