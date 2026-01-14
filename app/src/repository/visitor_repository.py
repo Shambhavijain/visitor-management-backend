@@ -11,50 +11,33 @@ from src.errors import error
 class VisitorRepository(ABC):
 
     @abstractmethod
-    def create(self, visitor: Visitor) -> None:
-        ...
+    def create(self, visitor: Visitor) -> None: ...
 
     @abstractmethod
-    def get_all_visitors(self) -> List[Visitor]:
-        ...
+    def get_all_visitors(self) -> List[Visitor]: ...
 
     @abstractmethod
-    def get_visitors_by_owner(self, owner_id: str) -> List[Visitor]:
-        ...
+    def get_visitors_by_owner(self, owner_id: str) -> List[Visitor]: ...
 
     @abstractmethod
-    def count_visitors(self) -> int:
-        ...
+    def count_visitors(self) -> int: ...
 
     @abstractmethod
     def update_visitor_status(
-        self,
-        visitor_id: str,
-        owner_id: str,
-        status: VisitorStatus
-    ) -> None:
-        ...
+        self, visitor_id: str, owner_id: str, status: VisitorStatus
+    ) -> None: ...
 
     @abstractmethod
-    def count_visitors_by_owner(
-        self,
-        owner_id: str
-    ) -> int :
-         ...   
-
-
+    def count_visitors_by_owner(self, owner_id: str) -> int: ...
 
 
 class DDBVisitorRepository(VisitorRepository):
 
     def __init__(
-        self,
-        ddb_resource: boto3.resources.base.ServiceResource,
-        table_name: str
+        self, ddb_resource: boto3.resources.base.ServiceResource, table_name: str
     ):
         self.table = ddb_resource.Table(table_name)
 
-    
     def create(self, visitor: Visitor) -> None:
         try:
             self.table.put_item(
@@ -66,13 +49,21 @@ class DDBVisitorRepository(VisitorRepository):
                     "Email": visitor.Email,
                     "Tower": visitor.Tower,
                     "FlatNo": visitor.FlatNo,
-                    "AddedByRole": visitor.AddedByRole.value,
-                    "Status": visitor.Status.value,
+                    "AddedByRole": (
+                        visitor.AddedByRole.value
+                        if hasattr(visitor.AddedByRole, "value")
+                        else visitor.AddedByRole
+                    ),
+                    "Status": (
+                        visitor.Status.value
+                        if hasattr(visitor.Status, "value")
+                        else visitor.Status
+                    ),
                     "OwnerEmail": visitor.OwnerEmail,
                     "OwnerID": visitor.OwnerID,
                     "CreatedAt": visitor.CreatedAt,
-                    }
-                )
+                }
+            )
         except ClientError as e:
             raise error.RepositoryError("failed to create visitor") from e
 
@@ -80,15 +71,14 @@ class DDBVisitorRepository(VisitorRepository):
         try:
             visitors: List[Visitor] = []
             last_evaluated_key = None
-            
+
             while True:
                 query_kwargs = {
                     "KeyConditionExpression": (
-                        Key("PK").eq("VISITORS") &
-                        Key("SK").begins_with("VISITOR#")
-                        )
+                        Key("PK").eq("VISITORS") & Key("SK").begins_with("VISITOR#")
+                    )
                 }
-                
+
                 if last_evaluated_key:
                     query_kwargs["ExclusiveStartKey"] = last_evaluated_key
 
@@ -106,20 +96,18 @@ class DDBVisitorRepository(VisitorRepository):
         except ClientError as e:
             raise error.RepositoryError("failed to fetch visitors") from e
 
-  
     def get_visitors_by_owner(self, owner_id: str) -> List[Visitor]:
         try:
             resp = self.table.query(
                 KeyConditionExpression=(
-                    Key("PK").eq("VISITORS") &
-                    Key("SK").begins_with(f"VISITOR#{owner_id}")
+                    Key("PK").eq("VISITORS")
+                    & Key("SK").begins_with(f"VISITOR#{owner_id}")
                 )
             )
             return [Visitor.from_ddb(item) for item in resp.get("Items", [])]
         except ClientError as e:
             raise error.RepositoryError("failed to fetch owner visitors") from e
 
-  
     def count_visitors(self) -> int:
         count = 0
         last_key = None
@@ -127,15 +115,14 @@ class DDBVisitorRepository(VisitorRepository):
         while True:
             kwargs = {
                 "KeyConditionExpression": (
-                    Key("PK").eq("VISITORS") &
-                    Key("SK").begins_with("VISITOR#")
-                    ),
+                    Key("PK").eq("VISITORS") & Key("SK").begins_with("VISITOR#")
+                ),
                 "Select": "COUNT",
             }
 
             if last_key:
                 kwargs["ExclusiveStartKey"] = last_key
-            
+
             resp = self.table.query(**kwargs)
             count += resp.get("Count", 0)
             last_key = resp.get("LastEvaluatedKey")
@@ -143,13 +130,8 @@ class DDBVisitorRepository(VisitorRepository):
                 break
         return count
 
-
-    
     def update_visitor_status(
-        self,
-        visitor_id: str,
-        owner_id: str,
-        status: VisitorStatus
+        self, visitor_id: str, owner_id: str, status: VisitorStatus
     ) -> None:
         try:
             self.table.update_item(
@@ -167,15 +149,16 @@ class DDBVisitorRepository(VisitorRepository):
             )
         except ClientError as e:
             raise error.RepositoryError("failed to update visitor status") from e
+
     def count_visitors_by_owner(self, owner_id: str) -> int:
         count = 0
         last_key = None
         while True:
             kwargs = {
                 "KeyConditionExpression": (
-                    Key("PK").eq("VISITORS") &
-                    Key("SK").begins_with(f"VISITOR#{owner_id}")
-                    ),
+                    Key("PK").eq("VISITORS")
+                    & Key("SK").begins_with(f"VISITOR#{owner_id}")
+                ),
                 "Select": "COUNT",
             }
 

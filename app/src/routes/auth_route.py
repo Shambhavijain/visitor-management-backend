@@ -19,8 +19,6 @@ def sign_up(
 ):
 
     auth_service.signup(user_request)
-    
-    
     sns_client = get_sns_client()
     sns_client.subscribe(
         TopicArn = sns_arn,
@@ -42,7 +40,6 @@ def login(
 ):
     response = auth_service.login(login_request)
 
-    
 
     return Response.success_response(
         data=response,

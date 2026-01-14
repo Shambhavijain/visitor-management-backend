@@ -42,6 +42,10 @@ Parameters:
   JwtSecretArn:
     Type: String
 
+  SnsTopicArn:
+    Type: String
+    Description: ARN of the SNS topic used by backend
+
 Resources:
   BackendLogGroup:
     Type: AWS::Logs::LogGroup
@@ -65,7 +69,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
             Action: sts:AssumeRole
       ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+        - !Sub "arn:${AWS::Partition}:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
       Policies:
         - PolicyName: AllowSecrets
           PolicyDocument:
@@ -98,11 +102,21 @@ Resources:
                   - dynamodb:DeleteItem
                   - dynamodb:Query
                   - dynamodb:Scan
+                  - dynamodb:TransactWriteItems
                 Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${DynamoTableName}
 
               - Effect: Allow
                 Action: secretsmanager:GetSecretValue
                 Resource: !Ref JwtSecretArn
+              - Effect: Allow
+                Action:
+                  - sns:Subscribe
+                Resource: !Ref SnsTopicArn
+
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref SnsTopicArn
 
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -193,6 +207,15 @@ Resources:
             - Name: JWT_SECRET_KEY
               ValueFrom: !Sub "${JwtSecretArn}:JWT_SECRET_KEY::"
 
+          HealthCheck:
+            Command:
+              - CMD-SHELL
+              - !Sub "curl -fsS http://localhost:${ContainerPort}/health || exit 1"
+            Interval: 30
+            Timeout: 5
+            Retries: 3
+            StartPeriod: 60
+
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: Listener
@@ -214,7 +237,7 @@ Resources:
         - ContainerName: !Ref ServiceName
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroup
-
+      HealthCheckGracePeriodSeconds: 90
 Outputs:
   BackendURL:
     Description: Backend ALB URL

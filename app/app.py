@@ -62,7 +62,7 @@ app.add_exception_handler(RepositoryError, err_handlers.handle_repository_error)
 app.add_exception_handler(AuthenticationError, err_handlers.handle_authentication_error)
 app.add_exception_handler(AuthorizationError, err_handlers.handle_authorization_error)
 app.add_exception_handler(UserNotFoundError, err_handlers.handle_usernotfound_error)
-# app.add_exception_handler(Exception, err_handlers.generic_exc_handler)
+app.add_exception_handler(Exception, err_handlers.generic_exc_handler)
 
 app.include_router(health_router)
 app.include_router(auth_router)

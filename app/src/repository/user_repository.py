@@ -119,6 +119,7 @@ class DDBUserRepository(UserRepository):
                 ]
             )
         except ClientError as e:
+            print("DynamoDB ERROR:", e.response)
             raise error.RepositoryError("failed to create user") from e
 
     def create_gatekeeper(self, user: User) -> None:
