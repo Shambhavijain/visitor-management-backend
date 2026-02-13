@@ -38,7 +38,13 @@ class AuthService:
         self.user_repo.create(user)
 
     def login(self, request: LoginUser) -> dict:
-        user = self.user_repo.get_by_email(request.email.lower())
+        try:
+            user = self.user_repo.get_by_email(request.email.lower())
+        except error.NotFoundError:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid email or password",
+            )
 
         if not verify_password(request.password, user.Password):
             raise HTTPException(

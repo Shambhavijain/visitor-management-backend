@@ -1,0 +1,462 @@
+---
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  "/health":
+    get:
+      tags:
+        - Health
+      summary: Health
+      operationId: health_health_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/auth/signup":
+    post:
+      tags:
+        - Auth
+      summary: Sign Up
+      operationId: sign_up_auth_signup_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/SignUpUser"
+        required: true
+      responses:
+        "201":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/auth/login":
+    post:
+      tags:
+        - Auth
+      summary: Login
+      operationId: login_auth_login_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/LoginUser"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/{user_id}":
+    delete:
+      tags:
+        - Users
+      summary: Delete User
+      operationId: delete_user_users__user_id__delete
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    get:
+      tags:
+        - Users
+      summary: Get User By Id
+      operationId: get_user_by_id_users__user_id__get
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/users/count":
+    get:
+      tags:
+        - Users
+      summary: Get Users Count
+      operationId: get_users_count_users_count_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/users/":
+    get:
+      tags:
+        - Users
+      summary: List Users
+      operationId: list_users_users__get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/gatekeeper/create":
+    post:
+      tags:
+        - Gatekeeper
+      summary: Create Gatekeeper
+      operationId: create_gatekeeper_gatekeeper_create_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/GatekeeperCreate"
+        required: true
+      responses:
+        "201":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/gatekeeper/":
+    get:
+      tags:
+        - Gatekeeper
+      summary: List Gatekeepers
+      operationId: list_gatekeepers_gatekeeper__get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/gatekeeper/{user_id}":
+    get:
+      tags:
+        - Gatekeeper
+      summary: Get Gatekeeper By Id
+      operationId: get_gatekeeper_by_id_gatekeeper__user_id__get
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+    delete:
+      tags:
+        - Gatekeeper
+      summary: Delete Gatekeeper
+      operationId: delete_gatekeeper_gatekeeper__user_id__delete
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            title: User Id
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/visitor/create":
+    post:
+      tags:
+        - Visitors
+      summary: Create Visitor
+      operationId: create_visitor_visitor_create_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CreateVisitorRequest"
+        required: true
+      responses:
+        "201":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/visitor/":
+    get:
+      tags:
+        - Visitors
+      summary: Get All Visitors
+      operationId: get_all_visitors_visitor__get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/visitor/count":
+    get:
+      tags:
+        - Visitors
+      summary: Get Visitors Count
+      operationId: get_visitors_count_visitor_count_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/visitor/owner":
+    get:
+      tags:
+        - Visitors
+      summary: Get Visitors By Owner
+      operationId: get_visitors_by_owner_visitor_owner_get
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/visitor/status":
+    patch:
+      tags:
+        - Visitors
+      summary: Update Visitor Status
+      operationId: update_visitor_status_visitor_status_patch
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UpdateVisitorRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        "422":
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+components:
+  schemas:
+    CreateVisitorRequest:
+      properties:
+        name:
+          type: string
+          minLength: 3
+          title: Name
+        email:
+          type: string
+          format: email
+          title: Email
+        tower:
+          type: string
+          title: Tower
+        flat_no:
+          type: string
+          title: Flat No
+      type: object
+      required:
+        - name
+        - email
+        - tower
+        - flat_no
+      title: CreateVisitorRequest
+    GatekeeperCreate:
+      properties:
+        username:
+          type: string
+          maxLength: 50
+          minLength: 3
+          title: Username
+          description: Gatekeeper full name
+        email:
+          type: string
+          format: email
+          title: Email
+        password:
+          type: string
+          minLength: 6
+          title: Password
+          description: Minimum 6 characters
+        address:
+          type: string
+          maxLength: 255
+          minLength: 5
+          title: Address
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - address
+      title: GatekeeperCreate
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    LoginUser:
+      properties:
+        email:
+          type: string
+          format: email
+          title: Email
+        password:
+          type: string
+          minLength: 6
+          title: Password
+          description:
+            Password must have atleast 1 numeric, 1 small alphabetic and  6
+            characters long.
+      type: object
+      required:
+        - email
+        - password
+      title: LoginUser
+    SignUpUser:
+      properties:
+        Name:
+          type: string
+          title: Name
+        Email:
+          type: string
+          format: email
+          title: Email
+        Password:
+          type: string
+          minLength: 6
+          title: Password
+          description: Password must contain at least 1 lowercase letter and 1 digit
+        Address:
+          type: string
+          title: Address
+        FlatNo:
+          type: string
+          title: Flatno
+        Tower:
+          type: string
+          title: Tower
+      type: object
+      required:
+        - Name
+        - Email
+        - Password
+        - Address
+        - FlatNo
+        - Tower
+      title: SignUpUser
+    UpdateVisitorRequest:
+      properties:
+        visitor_id:
+          type: string
+          minLength: 5
+          title: Visitor Id
+        status:
+          "$ref": "#/components/schemas/VisitorStatus"
+      type: object
+      required:
+        - visitor_id
+        - status
+      title: UpdateVisitorRequest
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+        - loc
+        - msg
+        - type
+      title: ValidationError
+    VisitorStatus:
+      type: string
+      enum:
+        - pending
+        - approved
+        - declined
+      title: VisitorStatus
